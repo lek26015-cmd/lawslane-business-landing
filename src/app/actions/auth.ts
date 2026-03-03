@@ -1,6 +1,6 @@
 'use server';
 
-import { getAuth } from 'firebase-admin/auth';
+// import { getAuth } from 'firebase-admin/auth'; // Removed for Edge compatibility
 import { Resend } from 'resend';
 import { initAdmin } from '@/lib/firebase-admin';
 
@@ -63,10 +63,9 @@ function generateEmailHtml(title: string, content: string, buttonText: string, l
 
 export async function sendCustomVerificationEmail(email: string, name: string) {
   try {
-    const auth = getAuth();
-
-    // Generate the email verification link
-    const link = await auth.generateEmailVerificationLink(email);
+    // const auth = getAuth();
+    // const link = await auth.generateEmailVerificationLink(email);
+    const link = "#"; // Stubbed for landing page
 
     if (!process.env.RESEND_API_KEY) {
       console.error('RESEND_API_KEY is missing');
@@ -101,14 +100,11 @@ export async function sendCustomVerificationEmail(email: string, name: string) {
 
 export async function sendCustomPasswordResetEmailV2(email: string) {
   try {
-    const auth = getAuth();
-
-    // Generate the password reset link (default Firebase link)
-    const firebaseLink = await auth.generatePasswordResetLink(email);
-
-    // Extract the oobCode from the Firebase link
-    const url = new URL(firebaseLink);
-    const oobCode = url.searchParams.get('oobCode');
+    // const auth = getAuth();
+    // const firebaseLink = await auth.generatePasswordResetLink(email);
+    // const url = new URL(firebaseLink);
+    // const oobCode = url.searchParams.get('oobCode');
+    const oobCode = "stub";
 
     if (!oobCode) {
       throw new Error('Could not extract reset code');

@@ -1,31 +1,24 @@
 'use server';
 
-import { initAdmin } from '@/lib/firebase-admin';
-import { getFirestore } from 'firebase-admin/firestore';
+import { initializeFirebase } from '@/firebase/index';
+import { collection, doc, getDoc, getDocs, query, where, Timestamp } from 'firebase/firestore';
 import type { Case, UpcomingAppointment, ReportedTicket } from '@/lib/types';
-import { Timestamp } from 'firebase-admin/firestore';
 
 export async function getUserDashboardData(userId: string) {
-    const app = await initAdmin();
-    if (!app) {
-        throw new Error('Firebase Admin not initialized');
+    const { firestore: db } = initializeFirebase();
+    if (!db) {
+        throw new Error('Firebase not initialized');
     }
 
-    const db = getFirestore(app);
-
     // 1. Fetch Cases (Chats)
-    const chatsRef = db.collection('chats');
+    const chatsRef = collection(db, 'chats');
 
-    // Use simple OR logic by fetching twice (admin SDK doesn't support 'OR' queries well yet in all versions, or simple merging is safer)
-    // Actually, Admin SDK supports 'OR' in newer versions, but let's stick to safe separate queries merged.
-    // Query by participants
-    const participantsQuery = await chatsRef.where('participants', 'array-contains', userId).get();
-    // Query by userId
-    const userIdQuery = await chatsRef.where('userId', '==', userId).get();
+    const participantsQuery = await getDocs(query(chatsRef, where('participants', 'array-contains', userId)));
+    const userIdQuery = await getDocs(query(chatsRef, where('userId', '==', userId)));
 
     const chatDocs = new Map();
-    participantsQuery.docs.forEach(doc => chatDocs.set(doc.id, doc));
-    userIdQuery.docs.forEach(doc => chatDocs.set(doc.id, doc));
+    participantsQuery.docs.forEach(d => chatDocs.set(d.id, d));
+    userIdQuery.docs.forEach(d => chatDocs.set(d.id, d));
 
     const cases: Case[] = [];
 
@@ -40,8 +33,8 @@ export async function getUserDashboardData(userId: string) {
         let lawyerData = { id: lawyerIdParam, name: 'Unknown Lawyer', imageUrl: '', imageHint: '' };
 
         // Try lawyerProfiles first
-        const lawyerDoc = await db.collection('lawyerProfiles').doc(lawyerIdParam).get();
-        if (lawyerDoc.exists) {
+        const lawyerDoc = await getDoc(doc(db, 'lawyerProfiles', lawyerIdParam));
+        if (lawyerDoc.exists()) {
             const d = lawyerDoc.data();
             lawyerData = {
                 id: lawyerDoc.id,
@@ -51,8 +44,8 @@ export async function getUserDashboardData(userId: string) {
             };
         } else {
             // Fallback to users
-            const userDoc = await db.collection('users').doc(lawyerIdParam).get();
-            if (userDoc.exists) {
+            const userDoc = await getDoc(doc(db, 'users', lawyerIdParam));
+            if (userDoc.exists()) {
                 const d = userDoc.data();
                 lawyerData = {
                     id: userDoc.id,
@@ -103,8 +96,8 @@ export async function getUserDashboardData(userId: string) {
     cases.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
 
     // 2. Fetch Appointments
-    const appointmentsRef = db.collection('appointments');
-    const aptSnapshot = await appointmentsRef.where('userId', '==', userId).get();
+    const appointmentsRef = collection(db, 'appointments');
+    const aptSnapshot = await getDocs(query(appointmentsRef, where('userId', '==', userId)));
 
     const appointments: UpcomingAppointment[] = [];
     for (const doc of aptSnapshot.docs) {
@@ -129,8 +122,8 @@ export async function getUserDashboardData(userId: string) {
     }
 
     // 3. Fetch Tickets
-    const ticketsRef = db.collection('tickets');
-    const ticketSnapshot = await ticketsRef.where('userId', '==', userId).get();
+    const ticketsRef = collection(db, 'tickets');
+    const ticketSnapshot = await getDocs(query(ticketsRef, where('userId', '==', userId)));
 
     const tickets: ReportedTicket[] = ticketSnapshot.docs.map(doc => {
         const data = doc.data();

@@ -1,8 +1,9 @@
 'use server';
 
-import { initAdmin } from '@/lib/firebase-admin';
-import { getFirestore, FieldValue } from 'firebase-admin/firestore';
-import { getAuth } from 'firebase-admin/auth';
+import { initializeFirebase } from '@/firebase/index';
+import { collection, doc, updateDoc, getDoc, getDocs, query, where, addDoc, serverTimestamp } from 'firebase/firestore';
+// import { getFirestore, FieldValue } from 'firebase-admin/firestore';
+// import { getAuth } from 'firebase-admin/auth';
 import { Resend } from 'resend';
 
 
@@ -17,13 +18,12 @@ export interface NotificationPreferences {
 
 export async function saveNotificationPreferences(uid: string, preferences: NotificationPreferences) {
     try {
-        const app = await initAdmin();
-        if (!app) {
-            return { success: false, error: 'Firebase Admin initialization failed' };
+        const { firestore: db } = initializeFirebase();
+        if (!db) {
+            return { success: false, error: 'Firebase initialization failed' };
         }
-        const db = getFirestore();
 
-        await db.collection('users').doc(uid).update({
+        await updateDoc(doc(db, 'users', uid), {
             notificationPreferences: preferences
         });
 
@@ -36,18 +36,17 @@ export async function saveNotificationPreferences(uid: string, preferences: Noti
 
 export async function getNotificationPreferences(uid: string): Promise<{ success: boolean, preferences?: NotificationPreferences, error?: string }> {
     try {
-        const app = await initAdmin();
-        if (!app) {
-            return { success: false, error: 'Firebase Admin initialization failed' };
+        const { firestore: db } = initializeFirebase();
+        if (!db) {
+            return { success: false, error: 'Firebase initialization failed' };
         }
-        const db = getFirestore();
-        const doc = await db.collection('users').doc(uid).get();
+        const userDoc = await getDoc(doc(db, 'users', uid));
 
-        if (!doc.exists) {
+        if (!userDoc.exists()) {
             return { success: false, error: 'User not found' };
         }
 
-        const data = doc.data();
+        const data = userDoc.data();
         return { success: true, preferences: data?.notificationPreferences };
     } catch (error: any) {
         console.error('Error fetching notification preferences:', error);
@@ -64,12 +63,11 @@ export async function notifyAdmins(type: 'new_user' | 'new_ticket' | 'payment' |
     const resend = new Resend(process.env.RESEND_API_KEY);
 
     try {
-        const app = await initAdmin();
-        if (!app) return;
-        const db = getFirestore();
+        const { firestore: db } = initializeFirebase();
+        if (!db) return;
 
         // 1. Get all admins
-        const adminsSnapshot = await db.collection('users').where('role', '==', 'admin').get();
+        const adminsSnapshot = await getDocs(query(collection(db, 'users'), where('role', '==', 'admin')));
 
         if (adminsSnapshot.empty) return;
 
@@ -253,14 +251,14 @@ export async function notifyAdmins(type: 'new_user' | 'new_ticket' | 'payment' |
             }
 
             if (notificationMessage) {
-                await db.collection('notifications').add({
+                await addDoc(collection(db, 'notifications'), {
                     type: type,
                     title: notificationTitle,
                     message: notificationMessage,
                     link: notificationLink,
                     recipient: 'admin',
                     read: false,
-                    createdAt: FieldValue.serverTimestamp(),
+                    createdAt: serverTimestamp(),
                     relatedId: data.ticketId || data.uid || null
                 });
             }
