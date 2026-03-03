@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-export const runtime = 'edge';
+// export const runtime = 'edge';
 
 export async function POST() {
     return NextResponse.json({ error: 'Auth session is disabled in this environment' }, { status: 501 });

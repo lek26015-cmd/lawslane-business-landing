@@ -1,5 +1,5 @@
 'use client';
-export const runtime = 'edge';
+// export const runtime = 'edge';
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { BusinessHeader } from '@/components/layout/business-header';

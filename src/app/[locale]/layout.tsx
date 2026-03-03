@@ -1,4 +1,4 @@
-export const runtime = 'edge';
+// // export const runtime = 'edge'; // Removed to avoid Vercel Edge size limit (1MB)
 import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import '../globals.css';
