@@ -7,7 +7,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { MessageData } from 'genkit';
+// import { MessageData } from 'genkit'; // Removed for edge compatibility
 import { z } from 'zod';
 import { getAllArticles } from '@/lib/data';
 import { Article } from '@/lib/types';
@@ -161,12 +161,19 @@ export async function chat(
       finalPrompt += `\n\n[System Note: This is a continuing conversation. Do NOT introduce yourself again. Do NOT say 'Hello' or 'Sawasdee'. Answer the question directly.]`;
     }
 
-    const { output } = await chatPrompt({
+    const response = await chatPrompt({
       history,
       prompt: finalPrompt,
     });
 
-    return output!;
+    // Try to parse JSON from the response
+    try {
+      const text = response.text.replace(/```json/g, '').replace(/```/g, '').trim();
+      return JSON.parse(text);
+    } catch (e) {
+      console.error("Failed to parse chat AI output as JSON:", response.text);
+      return await fallbackChat(prompt, locale);
+    }
   } catch (error) {
     console.error("[ChatFlow] AI generation failed:", error);
 

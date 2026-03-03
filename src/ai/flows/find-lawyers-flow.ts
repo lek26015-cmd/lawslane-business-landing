@@ -61,9 +61,17 @@ export async function findLawyerSpecialties(input: FindLawyersInput): Promise<Fi
   const { firestore } = initializeFirebase();
   const dynamicSpecialties = await getDynamicLawyerSpecialties(firestore);
 
-  const { output } = await findLawyersPrompt({
+  const result = await findLawyersPrompt({
     problem: input.problem,
     specialties: dynamicSpecialties,
   });
-  return output!;
+
+  // Try to parse JSON from the response if it's trapped in a code block
+  try {
+    const text = result.text.replace(/```json/g, '').replace(/```/g, '').trim();
+    return JSON.parse(text);
+  } catch (e) {
+    console.error("Failed to parse AI output as JSON:", result.text);
+    return { specialties: [] };
+  }
 }
