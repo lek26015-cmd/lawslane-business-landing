@@ -564,6 +564,8 @@ export function UnifiedSurveyForm() {
                   </FormItem>
                 )}
               />
+            </div>
+
             <FormField
               control={form.control}
               name="consent"
