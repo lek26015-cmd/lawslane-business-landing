@@ -43,6 +43,7 @@ const formSchema = z.object({
   confidenceFactor: z.string().min(1, { message: 'กรุณาเลือกปัจจัยหลัก' }),
   outsourceInterest: z.string().min(1, { message: 'กรุณาเลือกระดับความสนใจ' }),
   subscriptionInterest: z.string().min(5, { message: 'กรุณาระบุฟีเจอร์ที่สนใจ' }),
+  consent: z.boolean().refine(val => val === true, { message: 'กรุณากดยินยอมเพื่อดำเนินการต่อ' }),
 });
 
 const ROLES = [
@@ -88,6 +89,7 @@ export function UnifiedSurveyForm() {
     defaultValues: {
       challenges: [],
       hiringObstacles: [],
+      consent: false,
     },
   });
 
@@ -562,7 +564,29 @@ export function UnifiedSurveyForm() {
                   </FormItem>
                 )}
               />
-            </div>
+            <FormField
+              control={form.control}
+              name="consent"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-2xl border border-blue-100 bg-blue-50/30 p-6">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel className="text-sm font-medium text-slate-700 cursor-pointer">
+                      ยินยอมให้เก็บรวบรวมและใช้ข้อมูลตามนโยบายคุ้มครองข้อมูลส่วนบุคคล (PDPA)
+                    </FormLabel>
+                    <p className="text-xs text-slate-500">
+                      ข้อมูลของท่านจะถูกเก็บเป็นความลับและนำไปใช้เพื่อการพัฒนาแพลตฟอร์ม Lawslane เท่านั้น
+                    </p>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <Button type="submit" className="w-full bg-[#002f4b] hover:bg-[#004a75] text-white h-16 text-xl font-black rounded-2xl shadow-xl shadow-blue-100 transition-all hover:-translate-y-1 active:translate-y-0 active:scale-98" disabled={isSubmitting}>
               {isSubmitting ? (
