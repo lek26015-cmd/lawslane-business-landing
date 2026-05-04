@@ -15,6 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { CheckCircle2, Loader2, ClipboardCheck, Sparkles, Building2, ShieldAlert } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const formSchema = z.object({
   // Section 1: Profile
@@ -81,14 +82,32 @@ const HIRING_OBSTACLES = [
 ];
 
 export function UnifiedSurveyForm() {
+  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      respondentName: '',
+      role: '',
+      businessType: '',
+      businessTypeOther: '',
+      businessSize: '',
+      businessDuration: '',
+      contractVolume: '',
       challenges: [],
+      challengesOther: '',
+      currentTool: '',
+      initialHandling: '',
+      aiExpectation: '',
+      aiTimeSaved: '',
+      aiConcerns: '',
+      preferredChannel: '',
       hiringObstacles: [],
+      confidenceFactor: '',
+      outsourceInterest: '',
+      subscriptionInterest: '',
       consent: false,
     },
   });
@@ -106,9 +125,22 @@ export function UnifiedSurveyForm() {
       setIsSuccess(true);
     } catch (error) {
       console.error('Error submitting unified survey:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถส่งแบบสอบถามได้ กรุณาลองใหม่อีกครั้ง",
+        variant: "destructive"
+      });
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  function onInvalid(errors: any) {
+    toast({
+      title: "กรุณากรอกข้อมูลให้ครบถ้วน",
+      description: "มีบางช่องที่ยังไม่ได้กรอก หรือกรอกไม่ถูกต้อง (กรุณาตรวจสอบข้อความสีแดงในฟอร์ม)",
+      variant: "destructive"
+    });
   }
 
   if (isSuccess) {
@@ -150,7 +182,7 @@ export function UnifiedSurveyForm() {
       
       <CardContent className="px-8 md:px-16 pb-16">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-16">
+          <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className="space-y-16">
             
             {/* Section 1: Profile */}
             <div className="space-y-10">
@@ -180,7 +212,7 @@ export function UnifiedSurveyForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-slate-700 font-bold">บทบาทหลักของคุณ</FormLabel>
-                      <RadioGroup onValueChange={field.onChange} className="grid gap-2">
+                      <RadioGroup value={field.value} onValueChange={field.onChange} className="grid gap-2">
                         {ROLES.map((role) => (
                           <FormItem key={role.id} className="flex items-center space-x-2 space-y-0 p-2">
                             <FormControl><RadioGroupItem value={role.id} /></FormControl>
@@ -202,6 +234,7 @@ export function UnifiedSurveyForm() {
                     <FormLabel className="text-slate-700 font-bold">ประเภทธุรกิจ</FormLabel>
                     <FormControl>
                       <RadioGroup
+                        value={field.value}
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                         className="grid grid-cols-1 sm:grid-cols-2 gap-3"
@@ -237,7 +270,7 @@ export function UnifiedSurveyForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-slate-700 font-bold">จำนวนพนักงาน</FormLabel>
-                      <RadioGroup onValueChange={field.onChange} className="grid gap-1">
+                      <RadioGroup value={field.value} onValueChange={field.onChange} className="grid gap-1">
                         {['1-15 คน', '16-50 คน', '51-200 คน', '>200 คน'].map((s) => (
                           <FormItem key={s} className="flex items-center space-x-2 p-1">
                             <FormControl><RadioGroupItem value={s} /></FormControl>
@@ -266,7 +299,7 @@ export function UnifiedSurveyForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-slate-700 font-bold">ปริมาณสัญญา / เดือน</FormLabel>
-                      <RadioGroup onValueChange={field.onChange} className="grid gap-1">
+                      <RadioGroup value={field.value} onValueChange={field.onChange} className="grid gap-1">
                         {['<10', '10-30', '31-50', '>50'].map((v) => (
                           <FormItem key={v} className="flex items-center space-x-2 p-1">
                             <FormControl><RadioGroupItem value={v} /></FormControl>
@@ -383,6 +416,7 @@ export function UnifiedSurveyForm() {
                       </FormLabel>
                       <FormControl>
                         <RadioGroup
+                          value={field.value}
                           onValueChange={field.onChange}
                           className="flex justify-between max-w-md mx-auto pt-4"
                         >
@@ -406,7 +440,7 @@ export function UnifiedSurveyForm() {
                     <FormItem className="space-y-4">
                       <FormLabel className="text-blue-900 font-bold">ท่านคาดว่า AI จะช่วยประหยัดเวลาการตรวจสัญญาได้กี่เปอร์เซ็นต์?</FormLabel>
                       <FormControl>
-                        <RadioGroup onValueChange={field.onChange} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <RadioGroup value={field.value} onValueChange={field.onChange} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                           {['<20%', '20-40%', '40-60%', '>60%'].map((v) => (
                             <FormItem key={v} className="flex items-center space-x-2 bg-white p-3 rounded-xl border border-blue-100">
                               <FormControl><RadioGroupItem value={v} /></FormControl>
@@ -441,7 +475,7 @@ export function UnifiedSurveyForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-slate-700 font-bold">ช่องทางที่ท่านถนัดใช้งานเครื่องมือมากที่สุด</FormLabel>
-                      <RadioGroup onValueChange={field.onChange} className="grid gap-2">
+                      <RadioGroup value={field.value} onValueChange={field.onChange} className="grid gap-2">
                         {[
                           { id: 'web', label: 'เว็บไซต์ (คอมพิวเตอร์)' },
                           { id: 'app', label: 'แอปพลิเคชันมือถือ' },
@@ -513,7 +547,7 @@ export function UnifiedSurveyForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-slate-700 font-bold">ปัจจัยที่ทำให้มั่นใจที่สุดในการเลือกทนาย</FormLabel>
-                        <RadioGroup onValueChange={field.onChange} className="grid gap-2">
+                        <RadioGroup value={field.value} onValueChange={field.onChange} className="grid gap-2">
                           {[
                             { id: 'license', label: 'ประวัติและใบอนุญาตทนายที่ชัดเจน' },
                             { id: 'review', label: 'ระบบรีวิวจากผู้ใช้จริง' },
@@ -536,7 +570,7 @@ export function UnifiedSurveyForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-slate-700 font-bold">ความสนใจจ้างงานผ่านแพลตฟอร์ม</FormLabel>
-                        <RadioGroup onValueChange={field.onChange} className="flex gap-4">
+                        <RadioGroup value={field.value} onValueChange={field.onChange} className="flex gap-4">
                           {['สนใจมาก', 'ปานกลาง', 'น้อย', 'ไม่สนใจ'].map((v) => (
                             <FormItem key={v} className="flex items-center space-x-1">
                               <FormControl><RadioGroupItem value={v} /></FormControl>
