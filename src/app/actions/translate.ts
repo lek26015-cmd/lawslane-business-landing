@@ -14,6 +14,10 @@ export async function translateToMultipleLanguages(
         return { english: '', chinese: '' };
     }
 
+    // ปิดแล้ว: เรียก Gemini โดยไม่มี auth → ใครก็ใช้ API ของเราแปลภาษาฟรีได้ไม่จำกัด
+    // (แชทบนเว็บ marketing นี้ใช้งานไม่ได้อยู่แล้วเพราะ /api/auth/session เป็น stub)
+    return { english: '', chinese: '' };
+
     try {
         // Escape check: Ensure text doesn't break prompt, though standard string interpolation is usually fine.
         // We removed the quotes around thaiText to avoid breaking on internal quotes.

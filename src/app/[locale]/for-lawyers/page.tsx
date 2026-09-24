@@ -203,10 +203,10 @@ export default function ForLawyersPage() {
     }
   };
 
-  async function uploadFileToR2Wrapper(file: File, folder: string): Promise<string> {
+  async function uploadFileToR2Wrapper(file: File, folder: string, idToken: string): Promise<string> {
     const formData = new FormData();
     formData.append('file', file);
-    return await uploadToR2(formData, folder);
+    return await uploadToR2(formData, folder, idToken);
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -244,8 +244,8 @@ export default function ForLawyersPage() {
       const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
 
-      // Force token refresh
-      await user.getIdToken(true);
+      // Force token refresh — ใช้ token นี้พิสูจน์ว่าเป็นเจ้าของโฟลเดอร์ตอนอัปโหลดเอกสาร
+      const idToken = await user.getIdToken(true);
 
       // 2. Update user profile in Firebase Auth
       await updateProfile(user, { displayName: values.name });
@@ -259,13 +259,13 @@ export default function ForLawyersPage() {
       });
 
       // 3. Upload Files
-      const idCardUrl = await uploadFileToR2Wrapper(idCardFile, `lawyer-documents/${user.uid}/id-card`);
-      const licenseUrl = await uploadFileToR2Wrapper(licenseFile, `lawyer-documents/${user.uid}/license`);
+      const idCardUrl = await uploadFileToR2Wrapper(idCardFile, `lawyer-documents/${user.uid}/id-card`, idToken);
+      const licenseUrl = await uploadFileToR2Wrapper(licenseFile, `lawyer-documents/${user.uid}/license`, idToken);
 
       // 3.1 Upload Profile Image (optional)
       let profileImageUrl = '';
       if (profileImageFile) {
-        profileImageUrl = await uploadFileToR2Wrapper(profileImageFile, `lawyer-profile-images/${user.uid}`);
+        profileImageUrl = await uploadFileToR2Wrapper(profileImageFile, `lawyer-profile-images/${user.uid}`, idToken);
       }
 
       // 4. Create user profile document in Firestore (users collection)
