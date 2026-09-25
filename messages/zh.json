@@ -53,7 +53,7 @@
         },
         "verifyStatus": {
             "title": "验证律师身份",
-            "description": "为了最大程度的信心，您可以立即通过律师委员会数据库验证系统中每位律师的执照。",
+            "description": "为让您安心，您可以查询系统中律师的执照号码。",
             "button": "验证律师身份"
         },
         "smeSolution": {
@@ -154,7 +154,7 @@
         "lawyerNameLabel": "律师姓名",
         "lawyerNamePlaceholder": "请输入姓名",
         "verifyButton": "验证",
-        "verifying": "正在从律师协会验证信息（模拟）...",
+        "verifying": "正在验证信息...",
         "resultFound": {
             "title": "找到信息",
             "description": "该律师已在 Lawslane 系统中验证",
