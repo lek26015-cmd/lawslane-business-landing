@@ -53,7 +53,7 @@
         },
         "verifyStatus": {
             "title": "Verify Lawyer Status",
-            "description": "For maximum confidence, you can instantly verify the license of every lawyer in our system via the Lawyers Council database.",
+            "description": "For peace of mind, you can check the license number of lawyers in our system.",
             "button": "Verify Lawyer Status"
         },
         "smeSolution": {
@@ -178,7 +178,7 @@
         "lawyerNameLabel": "Lawyer's Full Name",
         "lawyerNamePlaceholder": "Enter full name",
         "verifyButton": "Verify",
-        "verifying": "Verifying information from the Bar Association (simulated)...",
+        "verifying": "Verifying information...",
         "resultFound": {
             "title": "Information Found",
             "description": "This lawyer has been verified in the Lawslane system",
