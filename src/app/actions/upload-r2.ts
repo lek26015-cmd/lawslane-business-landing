@@ -14,8 +14,9 @@ const ALLOWED_TYPES: Record<string, string> = {
 };
 
 // โฟลเดอร์ที่มี {uid} ต้องพิสูจน์ว่าเป็นเจ้าของ uid นั้นด้วย Firebase ID token
+// (เอกสารยืนยันตัวตนทนาย lawyer-documents/ ย้ายไป Firebase Storage แบบส่วนตัวแล้ว — ห้ามเพิ่มกลับ:
+//  bucket นี้เปิดสาธารณะ ใครได้ URL ก็เปิดไฟล์ได้)
 const OWNED_FOLDERS = [
-    /^lawyer-documents\/([A-Za-z0-9]{20,128})\/(id-card|license)$/,
     /^lawyer-profile-images\/([A-Za-z0-9]{20,128})$/,
 ];
 // ฟอร์มสาธารณะที่ไม่ต้อง login

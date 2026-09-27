@@ -9,6 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { createUserWithEmailAndPassword, updateProfile, signOut } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp, addDoc, collection } from 'firebase/firestore';
+import { ref as storageRef, uploadBytes } from 'firebase/storage';
 import { useFirebase } from '@/firebase';
 import { uploadToR2 } from '@/app/actions/upload-r2';
 
@@ -110,7 +111,7 @@ import { useRef } from 'react';
 
 export default function ForLawyersPage() {
   const router = useRouter();
-  const { auth, firestore } = useFirebase();
+  const { auth, firestore, storage } = useFirebase();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [idCardFile, setIdCardFile] = useState<File | null>(null);
@@ -203,6 +204,18 @@ export default function ForLawyersPage() {
     }
   };
 
+  // บัตรประชาชน / ใบอนุญาต → Firebase Storage แบบส่วนตัว lawyer_documents/{uid}/ (storage.rules: เจ้าของ + แอดมินเท่านั้น)
+  // เดิมอัปขึ้น R2 ที่เปิดสาธารณะ แล้วเก็บ URL ไว้ใน lawyerProfiles → ใครได้ลิงก์ก็เปิดบัตรประชาชนได้
+  // คืน storage path (ไม่ใช่ URL) แบบเดียวกับเว็บหลัก — หลังบ้านแอดมินเปิดด้วย getDownloadURL
+  async function uploadPrivateLawyerDocument(file: File, uid: string): Promise<string> {
+    if (!storage) throw new Error('ระบบจัดเก็บไฟล์ไม่พร้อมใช้งาน');
+    const ext = ({ 'application/pdf': 'pdf', 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' } as Record<string, string>)[file.type];
+    if (!ext) throw new Error('รองรับเฉพาะไฟล์ PDF, JPG, PNG, WEBP');
+    const path = `lawyer_documents/${uid}/${crypto.randomUUID()}.${ext}`;
+    await uploadBytes(storageRef(storage, path), file, { contentType: file.type });
+    return path;
+  }
+
   async function uploadFileToR2Wrapper(file: File, folder: string, idToken: string): Promise<string> {
     const formData = new FormData();
     formData.append('file', file);
@@ -259,8 +272,8 @@ export default function ForLawyersPage() {
       });
 
       // 3. Upload Files
-      const idCardUrl = await uploadFileToR2Wrapper(idCardFile, `lawyer-documents/${user.uid}/id-card`, idToken);
-      const licenseUrl = await uploadFileToR2Wrapper(licenseFile, `lawyer-documents/${user.uid}/license`, idToken);
+      const idCardUrl = await uploadPrivateLawyerDocument(idCardFile, user.uid);
+      const licenseUrl = await uploadPrivateLawyerDocument(licenseFile, user.uid);
 
       // 3.1 Upload Profile Image (optional)
       let profileImageUrl = '';
