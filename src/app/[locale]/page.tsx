@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Button } from '@/components/ui/button';
 import { CheckCircle, Building2, Zap, ShieldCheck, ArrowRight, Sparkles, Boxes, Workflow, Database, Network, BarChart3, Rocket, Calculator, Users, Search, LogIn, LayoutDashboard, Menu, LogOut, X, FileText, CreditCard, CalendarDays, Puzzle, Bot, Banknote } from 'lucide-react';
 import { FadeIn } from '@/components/fade-in';
+import { SilkBackground } from '@/components/silk-background';
 import { SmeContactForm } from '@/components/sme-contact-form';
 import { Link } from '@/navigation';
 import { useUser } from '@/firebase';
@@ -40,8 +41,7 @@ export default function B2BLandingPage() {
 
             {/* Hero Section */}
             <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden bg-slate-900">
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-blue-500/20 blur-[120px] rounded-full"></div>
+                <SilkBackground />
 
                 <div className="container mx-auto px-4 relative z-10">
                     <div className="max-w-4xl mx-auto text-center">
