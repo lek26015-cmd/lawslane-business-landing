@@ -52,13 +52,13 @@ export default function ContactSalesPage() {
                                                     <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-blue-50">
                                                         <Mail className="w-5 h-5 text-slate-400 group-hover:text-blue-600" />
                                                     </div>
-                                                    <span className="font-medium">noreply@lawslane.com</span>
+                                                    <span className="font-medium">lawslanelawyer@gmail.com</span>
                                                 </div>
                                                 <div className="flex items-center gap-4 text-slate-600 hover:text-blue-600 transition-colors cursor-pointer group">
                                                     <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-blue-50">
                                                         <Phone className="w-5 h-5 text-slate-400 group-hover:text-blue-600" />
                                                     </div>
-                                                    <span className="font-medium">097-227-5494</span>
+                                                    <span className="font-medium">061-645-7327</span>
                                                 </div>
                                                 <div className="flex items-center gap-4 text-slate-600 hover:text-blue-600 transition-colors cursor-pointer group">
                                                     <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-blue-50">
